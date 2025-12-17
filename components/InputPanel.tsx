@@ -26,7 +26,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({ inputs, setInputs, onGen
           </div>
           <h1 className="text-xl font-bold font-serif text-stone-800 tracking-tight">Strategy Engine</h1>
         </div>
-        <p className="text-xs text-stone-500 ml-10">Powered by Gemini 3 Pro • v1.1</p>
+        <p className="text-xs text-stone-500 ml-10">Powered by Gemini 3 Pro • v1.2</p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
