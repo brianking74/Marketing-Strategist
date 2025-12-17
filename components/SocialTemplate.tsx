@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Type, Award, Quote, Download, Palette, Star, MessageSquare } from 'lucide-react';
+import { Upload, Type, Award, Quote, Download, Palette, Star, MessageSquare, Plus, Check } from 'lucide-react';
 
 interface TemplateData {
   wineName: string;
@@ -19,15 +19,25 @@ const DEFAULT_DATA: TemplateData = {
   quoteAuthor: "James Suckling",
   score: "99",
   award: "Double Gold",
-  accentColor: "bg-rose-900",
+  accentColor: "#881337", // Default Bordeaux Hex
   image: null
 };
 
 const COLOR_OPTIONS = [
-  { name: 'Bordeaux', class: 'bg-rose-900', text: 'text-rose-900' },
-  { name: 'Slate', class: 'bg-slate-900', text: 'text-slate-900' },
-  { name: 'Gold', class: 'bg-yellow-700', text: 'text-yellow-700' },
-  { name: 'Emerald', class: 'bg-emerald-900', text: 'text-emerald-900' },
+  { name: 'Bordeaux', hex: '#881337' },
+  { name: 'Crimson', hex: '#991b1b' },
+  { name: 'Burnt Orange', hex: '#ea580c' },
+  { name: 'Amber', hex: '#d97706' },
+  { name: 'Olive', hex: '#65a30d' },
+  { name: 'Emerald', hex: '#059669' },
+  { name: 'Teal', hex: '#0d9488' },
+  { name: 'Cyan', hex: '#0891b2' },
+  { name: 'Ocean', hex: '#0c4a6e' },
+  { name: 'Indigo', hex: '#4f46e5' },
+  { name: 'Violet', hex: '#7c3aed' },
+  { name: 'Fuchsia', hex: '#c026d3' },
+  { name: 'Slate', hex: '#475569' },
+  { name: 'Black', hex: '#171717' },
 ];
 
 export const SocialTemplate: React.FC = () => {
@@ -42,7 +52,7 @@ export const SocialTemplate: React.FC = () => {
     }
   };
 
-  const selectedColor = COLOR_OPTIONS.find(c => c.class === data.accentColor) || COLOR_OPTIONS[0];
+  const isCustomColor = !COLOR_OPTIONS.some(c => c.hex.toLowerCase() === data.accentColor.toLowerCase());
 
   return (
     <div className="flex h-full w-full bg-stone-50 overflow-hidden">
@@ -164,16 +174,43 @@ export const SocialTemplate: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-600">Accent Color</label>
-              <div className="flex gap-2">
+              <label className="text-sm font-medium text-stone-600 mb-2 block">Accent Color</label>
+              <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map((color) => (
                   <button
                     key={color.name}
-                    onClick={() => setData({ ...data, accentColor: color.class })}
-                    className={`w-8 h-8 rounded-full ${color.class} ${data.accentColor === color.class ? 'ring-2 ring-offset-2 ring-stone-400' : ''}`}
+                    onClick={() => setData({ ...data, accentColor: color.hex })}
+                    className={`w-8 h-8 rounded-full transition-all border border-stone-200 relative ${data.accentColor === color.hex ? 'ring-2 ring-offset-2 ring-stone-400 scale-110' : 'hover:scale-105'}`}
+                    style={{ backgroundColor: color.hex }}
                     title={color.name}
-                  />
+                  >
+                    {data.accentColor === color.hex && (
+                      <Check className="text-white w-4 h-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" strokeWidth={3} />
+                    )}
+                  </button>
                 ))}
+                
+                {/* Custom Color Picker */}
+                <div className="relative group w-8 h-8" title="Custom Color">
+                    <input
+                        type="color"
+                        value={data.accentColor}
+                        onChange={(e) => setData({ ...data, accentColor: e.target.value })}
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+                    />
+                    {isCustomColor ? (
+                      <div 
+                        className="w-full h-full rounded-full border border-stone-200 flex items-center justify-center ring-2 ring-offset-2 ring-stone-400"
+                        style={{ backgroundColor: data.accentColor }}
+                      >
+                         <Palette size={14} className="text-white drop-shadow-md" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-white border border-stone-200 flex items-center justify-center group-hover:bg-stone-50 transition-colors">
+                          <Plus size={14} className="text-stone-400" />
+                      </div>
+                    )}
+                </div>
               </div>
             </div>
           </div>
@@ -195,7 +232,7 @@ export const SocialTemplate: React.FC = () => {
           style={{ width: '600px', height: '600px' }} // Using fixed size for preview consistency
         >
           {/* Top Bar */}
-          <div className="absolute top-0 w-full h-2 bg-gradient-to-r from-rose-900 to-rose-700 z-20"></div>
+          <div className="absolute top-0 w-full h-2 z-20" style={{ backgroundColor: data.accentColor }}></div>
 
           {/* Main Content Layout */}
           <div className="flex h-full">
@@ -217,9 +254,9 @@ export const SocialTemplate: React.FC = () => {
               
               <div className="space-y-6 relative z-10">
                 <div>
-                   <span className={`text-xs font-bold tracking-[0.2em] uppercase ${selectedColor.text}`}>New Arrival</span>
+                   <span className="text-xs font-bold tracking-[0.2em] uppercase" style={{ color: data.accentColor }}>New Arrival</span>
                    <h1 className="font-serif text-4xl font-bold text-stone-900 leading-tight mt-2">{data.wineName}</h1>
-                   <div className={`h-1 w-16 ${data.accentColor} mt-4`}></div>
+                   <div className="h-1 w-16 mt-4" style={{ backgroundColor: data.accentColor }}></div>
                 </div>
 
                 <p className="text-stone-600 leading-relaxed font-light">
@@ -229,7 +266,7 @@ export const SocialTemplate: React.FC = () => {
                 {/* Quote Section */}
                 {data.quote && (
                   <div className="relative pl-6 border-l-2 border-stone-200 py-1 mt-4">
-                    <Quote size={20} className={`${selectedColor.text} opacity-20 absolute top-0 left-2 -translate-x-full`} />
+                    <Quote size={20} className="opacity-20 absolute top-0 left-2 -translate-x-full" style={{ color: data.accentColor }} />
                     <p className="font-serif italic text-stone-800 text-lg leading-snug">
                       "{data.quote}"
                     </p>
@@ -245,7 +282,7 @@ export const SocialTemplate: React.FC = () => {
                 <div className="flex items-center gap-4">
                    {/* Score Badge */}
                    {data.score && (
-                     <div className={`flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 border-stone-100 ${selectedColor.text} bg-stone-50`}>
+                     <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 border-stone-100 bg-stone-50" style={{ color: data.accentColor }}>
                         <span className="text-2xl font-bold font-serif leading-none">{data.score}</span>
                         <span className="text-[0.6rem] font-bold uppercase tracking-wide">Points</span>
                      </div>
