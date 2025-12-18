@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Type, Award, Quote, Download, Palette, Star, MessageSquare, Plus, Check } from 'lucide-react';
+import { Upload, Type, Award, Quote, Download, Palette, Star, MessageSquare, Plus, Check, Image as ImageIcon, Wine } from 'lucide-react';
 
 interface TemplateData {
   wineName: string;
@@ -9,7 +9,8 @@ interface TemplateData {
   score: string;
   award: string;
   accentColor: string;
-  image: string | null;
+  bgImage: string | null;
+  bottleImage: string | null;
 }
 
 const DEFAULT_DATA: TemplateData = {
@@ -20,7 +21,8 @@ const DEFAULT_DATA: TemplateData = {
   score: "99",
   award: "Double Gold",
   accentColor: "#881337", // Default Bordeaux Hex
-  image: null
+  bgImage: null,
+  bottleImage: null
 };
 
 const COLOR_OPTIONS = [
@@ -42,13 +44,22 @@ const COLOR_OPTIONS = [
 
 export const SocialTemplate: React.FC = () => {
   const [data, setData] = useState<TemplateData>(DEFAULT_DATA);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const bgInputRef = useRef<HTMLInputElement>(null);
+  const bottleInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      setData(prev => ({ ...prev, image: url }));
+      setData(prev => ({ ...prev, bgImage: url }));
+    }
+  };
+
+  const handleBottleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setData(prev => ({ ...prev, bottleImage: url }));
     }
   };
 
@@ -155,25 +166,62 @@ export const SocialTemplate: React.FC = () => {
               <Palette size={14} /> Visual Style
             </h3>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-600">Product Image</label>
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full h-24 border-2 border-dashed border-stone-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-rose-400 hover:bg-rose-50 transition-colors"
-              >
-                <Upload className="text-stone-400 mb-1" size={20} />
-                <span className="text-xs text-stone-500">Click to upload bottle</span>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Background Upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-stone-600">Background</label>
+                <div 
+                  onClick={() => bgInputRef.current?.click()}
+                  className="w-full h-24 border-2 border-dashed border-stone-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-rose-400 hover:bg-rose-50 transition-colors relative overflow-hidden group bg-white"
+                >
+                  {data.bgImage ? (
+                    <img src={data.bgImage} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Background thumbnail" />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400">
+                      <ImageIcon className="mb-1" size={20} />
+                      <span className="text-[10px] uppercase font-bold tracking-wide">BG Layer</span>
+                    </div>
+                  )}
+                </div>
+                <input 
+                  ref={bgInputRef}
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleBgUpload} 
+                  className="hidden" 
+                />
               </div>
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageUpload} 
-                className="hidden" 
-              />
+
+              {/* Bottle Upload */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium text-stone-600">Bottle (PNG)</label>
+                  <span className="text-[10px] text-stone-400 font-medium tracking-tight">Rec: 400x1200px</span>
+                </div>
+                <div 
+                  onClick={() => bottleInputRef.current?.click()}
+                  className="w-full h-24 border-2 border-dashed border-stone-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-rose-400 hover:bg-rose-50 transition-colors relative overflow-hidden group bg-white"
+                >
+                  {data.bottleImage ? (
+                    <img src={data.bottleImage} className="h-full w-auto object-contain p-2 group-hover:scale-110 transition-transform" alt="Bottle thumbnail" />
+                  ) : (
+                    <div className="flex flex-col items-center text-stone-400">
+                      <Wine className="mb-1" size={20} />
+                      <span className="text-[10px] uppercase font-bold tracking-wide">Bottle Layer</span>
+                    </div>
+                  )}
+                </div>
+                <input 
+                  ref={bottleInputRef}
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleBottleUpload} 
+                  className="hidden" 
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               <label className="text-sm font-medium text-stone-600 mb-2 block">Accent Color</label>
               <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map((color) => (
@@ -237,15 +285,31 @@ export const SocialTemplate: React.FC = () => {
           {/* Main Content Layout */}
           <div className="flex h-full">
             
-            {/* Left Side: Image */}
+            {/* Left Side: Image Layers */}
             <div className="w-1/2 bg-stone-100 relative overflow-hidden flex items-center justify-center">
-               {data.image ? (
-                 <img src={data.image} alt="Wine Bottle" className="h-[90%] w-[90%] object-contain opacity-90 hover:scale-105 transition-transform duration-700" />
-               ) : (
-                 <div className="text-stone-300 flex flex-col items-center">
-                   <Upload size={48} className="mb-2" />
-                   <span className="text-sm font-serif italic">Upload Bottle Image</span>
+               
+               {/* Background Layer */}
+               {data.bgImage && (
+                 <div className="absolute inset-0 z-0">
+                    <img src={data.bgImage} alt="Background" className="w-full h-full object-cover" />
+                    {/* Optional overlay to ensure text/bottle contrast if we were overlaying text, but here it's just bottle */}
                  </div>
+               )}
+
+               {/* Bottle Layer */}
+               {data.bottleImage ? (
+                 <img 
+                   src={data.bottleImage} 
+                   alt="Wine Bottle" 
+                   className="relative z-10 h-[90%] w-[90%] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:scale-105 transition-transform duration-700" 
+                 />
+               ) : (
+                 !data.bgImage && (
+                    <div className="text-stone-300 flex flex-col items-center relative z-10">
+                      <Upload size={48} className="mb-2" />
+                      <span className="text-sm font-serif italic">Upload Visuals</span>
+                    </div>
+                 )
                )}
             </div>
 
@@ -282,7 +346,7 @@ export const SocialTemplate: React.FC = () => {
                 <div className="flex items-center gap-4">
                    {/* Score Badge */}
                    {data.score && (
-                     <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 border-stone-100 bg-stone-50" style={{ color: data.accentColor }}>
+                     <div className="flex flex-col items-center justify-center w-16 h-16 rounded-full border border-black bg-stone-100" style={{ color: data.accentColor }}>
                         <span className="text-2xl font-bold font-serif leading-none">{data.score}</span>
                         <span className="text-[0.6rem] font-bold uppercase tracking-wide">Points</span>
                      </div>
@@ -292,7 +356,7 @@ export const SocialTemplate: React.FC = () => {
                      <div className="flex flex-col">
                         <div className="flex items-center gap-1 text-yellow-600 mb-1">
                            <Award size={16} fill="currentColor" />
-                           <Award size={16} fill="currentColor" />
+                           {data.award.toLowerCase().includes('double') && <Award size={16} fill="currentColor" />}
                         </div>
                         <span className="text-xs font-bold text-stone-800 uppercase max-w-[100px] leading-tight">{data.award}</span>
                      </div>
