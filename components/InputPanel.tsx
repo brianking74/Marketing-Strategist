@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MarketingInputs, StreamStatus } from '../types';
 import { Wine, Target, Rocket, MessageCircle } from 'lucide-react';
@@ -7,9 +8,10 @@ interface InputPanelProps {
   setInputs: React.Dispatch<React.SetStateAction<MarketingInputs>>;
   onGenerate: () => void;
   status: StreamStatus;
+  inline?: boolean;
 }
 
-export const InputPanel: React.FC<InputPanelProps> = ({ inputs, setInputs, onGenerate, status }) => {
+export const InputPanel: React.FC<InputPanelProps> = ({ inputs, setInputs, onGenerate, status, inline = false }) => {
   
   const handleChange = (field: keyof MarketingInputs, value: string) => {
     setInputs(prev => ({ ...prev, [field]: value }));
@@ -18,7 +20,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({ inputs, setInputs, onGen
   const isGenerating = status === StreamStatus.streaming;
 
   return (
-    <div className="w-full lg:w-96 bg-white border-r border-stone-200 h-full flex flex-col shadow-xl z-10">
+    <div className={`${inline ? 'w-full mb-8' : 'w-full lg:w-96 h-full flex flex-col border-r border-stone-200'} bg-white shadow-xl z-10 overflow-hidden rounded-2xl lg:rounded-none`}>
       <div className="p-6 border-b border-stone-100 bg-stone-50/50">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-8 h-8 rounded-full bg-rose-700 text-white flex items-center justify-center font-bold font-serif">
@@ -29,7 +31,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({ inputs, setInputs, onGen
         <p className="text-xs text-stone-500 ml-10">Powered by Gemini 3 Pro • v1.3</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className={`p-6 space-y-6 ${inline ? '' : 'flex-1 overflow-y-auto'}`}>
         
         {/* Product Input */}
         <div className="space-y-2">

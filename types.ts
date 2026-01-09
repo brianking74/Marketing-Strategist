@@ -1,3 +1,4 @@
+
 export interface MarketingInputs {
   product: string;
   audience: string;
@@ -18,3 +19,5 @@ export enum StreamStatus {
   COMPLETED = 'COMPLETED',
   ERROR = 'ERROR'
 }
+
+export type AppTab = 'strategy' | 'social' | 'video';

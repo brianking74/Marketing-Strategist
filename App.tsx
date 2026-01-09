@@ -1,30 +1,24 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { InputPanel } from './components/InputPanel';
 import { StrategyDisplay } from './components/StrategyDisplay';
 import { SocialTemplate } from './components/SocialTemplate';
-import { MarketingInputs, StreamStatus } from './types';
+import { VideoStudio } from './components/VideoStudio';
+import { MarketingInputs, StreamStatus, AppTab } from './types';
 import { DEFAULT_INPUTS } from './constants';
 import { generateMarketingStrategyStream } from './services/geminiService';
-import { LayoutDashboard, PenTool } from 'lucide-react';
+import { LayoutDashboard, PenTool, Video } from 'lucide-react';
 
 const App: React.FC = () => {
   const [inputs, setInputs] = useState<MarketingInputs>(DEFAULT_INPUTS);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [status, setStatus] = useState<StreamStatus>(StreamStatus.IDLE);
-  const [activeTab, setActiveTab] = useState<'strategy' | 'social'>('strategy');
+  const [activeTab, setActiveTab] = useState<AppTab>('strategy');
   const contentEndRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll logic
-  useEffect(() => {
-    if (status === StreamStatus.streaming && contentEndRef.current && activeTab === 'strategy') {
-        // Optional: Scroll to bottom while generating
-    }
-  }, [generatedContent, status, activeTab]);
 
   const handleGenerate = async () => {
     if (status === StreamStatus.streaming) return;
 
-    // Ensure we are on the strategy tab when generating
     setActiveTab('strategy');
     setGeneratedContent('');
     setStatus(StreamStatus.streaming);
@@ -65,6 +59,14 @@ const App: React.FC = () => {
          >
            <PenTool size={24} />
          </button>
+
+         <button 
+           onClick={() => setActiveTab('video')}
+           className={`p-3 rounded-xl transition-all ${activeTab === 'video' ? 'bg-white/10 text-white shadow-inner' : 'hover:bg-white/5 hover:text-white'}`}
+           title="Video Studio"
+         >
+           <Video size={24} />
+         </button>
       </div>
 
       {/* Mobile Header */}
@@ -86,6 +88,12 @@ const App: React.FC = () => {
              >
                <PenTool size={18} />
              </button>
+             <button 
+                onClick={() => setActiveTab('video')}
+                className={`p-2 rounded-md transition-all ${activeTab === 'video' ? 'bg-stone-700 text-white' : 'text-stone-400'}`}
+             >
+               <Video size={18} />
+             </button>
          </div>
       </div>
 
@@ -94,7 +102,7 @@ const App: React.FC = () => {
         
         {activeTab === 'strategy' ? (
           <>
-            {/* Strategy Layout */}
+            {/* Desktop Sidebar InputPanel */}
             <div className="hidden lg:block h-full shrink-0">
               <InputPanel 
                   inputs={inputs} 
@@ -106,43 +114,26 @@ const App: React.FC = () => {
 
             <div className="flex-1 h-full overflow-y-auto relative scroll-smooth bg-stone-50">
               <main className="p-4 lg:p-12 pb-32">
-                <StrategyDisplay content={generatedContent} />
-                <div ref={contentEndRef} />
-              </main>
-              
-              {/* Mobile FAB for Inputs */}
-              <div className="lg:hidden fixed bottom-6 right-6 z-30">
-                 <button 
-                   onClick={() => document.getElementById('mobile-inputs')?.classList.toggle('translate-y-full')}
-                   className="bg-rose-900 text-white p-4 rounded-full shadow-xl"
-                 >
-                   <LayoutDashboard />
-                 </button>
-              </div>
-
-              {/* Mobile Inputs Drawer */}
-              <div 
-                 id="mobile-inputs" 
-                 className="lg:hidden fixed inset-x-0 bottom-0 z-40 bg-white shadow-2xl transform transition-transform duration-300 translate-y-full rounded-t-2xl h-[80vh] flex flex-col"
-              >
-                  <div className="p-2 flex justify-center border-b border-stone-100" onClick={() => document.getElementById('mobile-inputs')?.classList.add('translate-y-full')}>
-                    <div className="w-12 h-1.5 bg-stone-300 rounded-full my-2"></div>
-                  </div>
+                {/* Mobile Inline InputPanel at the top */}
+                <div className="lg:hidden">
                   <InputPanel 
                     inputs={inputs} 
                     setInputs={setInputs} 
-                    onGenerate={() => {
-                       handleGenerate();
-                       document.getElementById('mobile-inputs')?.classList.add('translate-y-full');
-                    }}
+                    onGenerate={handleGenerate}
                     status={status}
+                    inline={true}
                   />
-              </div>
+                </div>
+
+                <StrategyDisplay content={generatedContent} />
+                <div ref={contentEndRef} />
+              </main>
             </div>
           </>
-        ) : (
-          /* Social Studio Layout */
+        ) : activeTab === 'social' ? (
           <SocialTemplate />
+        ) : (
+          <VideoStudio />
         )}
 
       </div>
